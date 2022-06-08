@@ -46,7 +46,7 @@ x-common-keys: &common-keys
     ports:
       - 5055:5055
     volumes:
-      - /path/to/appdata/config:/config
+      - /home/docker/overseerr:/config
  
   handbrake:
     container_name: handbrake
