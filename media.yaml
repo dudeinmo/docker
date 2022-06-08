@@ -1,0 +1,71 @@
+version: "2.1"
+
+###### HOST MOUNTS ######
+# NFS Mount Media to Host /media
+# NFS Mount Data to Host /home
+
+########################### EXTENSION FIELDS
+x-environment: &default-tz-puid-pgid
+  TZ: TZ=America/Chicago
+  PUID: PUID=1000
+  PGID: PGID=1000
+
+x-common-keys: &common-keys
+  environment:
+    <<: *default-tz-puid-pgid
+  restart: unless-stopped
+########################### EXTENSION FIELDS
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+      - PLEX_CLAIM=claim-123234234
+    volumes:
+      - /home/docker/plex:/config
+      - /media:/media
+    restart: unless-stopped
+    
+  tautulli:
+    container_name: tautulli
+    image: lscr.io/linuxserver/tautulli:latest
+    <<: *common-keys # See EXTENSION FIELDS
+    ports:
+      - 8181:8181 
+    volumes:
+      - /home/docker/tautulli:/config
+      
+  overseerr:    
+    container_name: overseerr
+    image: lscr.io/linuxserver/overseerr:latest
+    <<: *common-keys # See EXTENSION FIELDS
+    ports:
+      - 5055:5055
+    volumes:
+      - /path/to/appdata/config:/config
+ 
+  handbrake:
+    container_name: handbrake
+    image: jlesage/handbrake
+    <<: *common-keys # See EXTENSION FIELDS
+    ports:
+      - 5800:5800
+    volumes:
+      - /home/docker/handbrake:/config:rw
+      - /media:/storage:ro
+      - /media/handbrake_watch:/watch:rw
+      - /media/handbrake_output:/output:rw
+      
+  jdownloader2:
+    container_name: jdownloader2
+    image: jlesage/jdownloader-2
+    <<: *common-keys # See EXTENSION FIELDS
+    ports:
+      - 5801:5800
+    volumes:
+      - /home/docker/jdownloader2:/config:rw
+      - /media/downloads:/output:rw
