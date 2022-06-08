@@ -1,0 +1,36 @@
+version: "2.1"
+
+###### HOST MOUNTS ######
+# NFS Mount Media to Host /media
+# NFS Mount Data to Host /home
+
+########################### EXTENSION FIELDS
+x-environment: &default-tz-puid-pgid
+  TZ: TZ=America/Chicago
+  PUID: PUID=1000
+  PGID: PGID=1000
+
+x-common-keys: &common-keys
+  environment:
+    <<: *default-tz-puid-pgid
+  restart: unless-stopped
+########################### EXTENSION FIELDS
+
+services:
+  heimdall:
+    container_name: heimdall
+    image: ghcr.io/linuxserver/heimdall
+    <<: *common-keys # See EXTENSION FIELDS
+    ports:
+      - 89:80
+      - 443:443
+    volumes:
+      - /home/docker/heimdall:/config
+      
+  watchtower:
+    container_name: watchtower
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30
+    restart: unless-stopped
